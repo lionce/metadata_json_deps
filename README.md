@@ -22,16 +22,17 @@ gem 'metadata_json_deps'
 
 ### Testing with metadata-json-deps
 
-On the command line, run `metadata-json-deps` with the path(s) of your `metadata.json` file(s):
+On the command line, run `metadata-json-deps` with the path of your modules_list file, which contains a list of all the modules that you want to check,
+ updated module name, updated version for that module, logs file path, true/false for the option to send logs to slack to a specific channel:
 
 ```shell
-metadata-json-deps /path/to/metadata.json
+metadata-json-deps module_list.txt puppetlabs/stdlib 7.0.0 logs.log true
 ```
 
 It can also be run verbosely to show valid dependencies:
 
 ```shell
-metadata-json-deps -v modules/*/metadata.json
+metadata-json-deps module_list.txt puppetlabs/stdlib 7.0.0 logs.log -v true
 ```
 
 ### Testing with metadata-json-deps as a Rake task
@@ -39,11 +40,8 @@ metadata-json-deps -v modules/*/metadata.json
 You can also integrate `metadata-json-deps` checks into your tests using a Rake task:
 
 ```ruby
-require 'metadata_json_deps'
-
-desc 'Run metadata-json-deps'
-task :metadata_deps do
-  files = FileList['modules/*/metadata.json']
-  MetadataJsonDeps::Runner.run(files)
+desc 'Compare specfified module and version against dependencies of other modules'
+task :compare_dependencies, [:managed_modules, :module, :version, :verbose, :use_slack] do |task, args|
+  MetadataJsonDeps::Runner.run(args[:managed_modules], args[:module], args[:version], args[:verbose], args[:use_slack], args[:logs_file])
 end
 ```
